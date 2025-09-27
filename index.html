@@ -1,141 +1,299 @@
-import { useState } from 'react';
-import { Leaf, DollarSign, Users } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scopri i Pilastri della Sostenibilità</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-export default function SustainabilityCardGame() {
-  const initialCards = [
-    { id: 1, type: 'ambiente', icon: Leaf, color: 'bg-green-500', title: 'Ambiente' },
-    { id: 2, type: 'ambiente', icon: Leaf, color: 'bg-green-500', title: 'Ambiente' },
-    { id: 3, type: 'economia', icon: DollarSign, color: 'bg-blue-500', title: 'Economia' },
-    { id: 4, type: 'economia', icon: DollarSign, color: 'bg-blue-500', title: 'Economia' },
-    { id: 5, type: 'societa', icon: Users, color: 'bg-purple-500', title: 'Società' },
-    { id: 6, type: 'societa', icon: Users, color: 'bg-purple-500', title: 'Società' },
-  ];
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f0fdfa 0%, #dbeafe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-  const shuffleCards = (array) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
 
-  const [cards, setCards] = useState(() => shuffleCards(initialCards));
-  const [flipped, setFlipped] = useState([]);
-  const [matched, setMatched] = useState([]);
-  const [attempts, setAttempts] = useState(0);
+        h2 {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
 
-  const handleCardClick = (index) => {
-    if (flipped.length === 2 || flipped.includes(index) || matched.includes(cards[index].type)) return;
+        .message {
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            color: #374151;
+        }
 
-    const newFlipped = [...flipped, index];
-    setFlipped(newFlipped);
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
 
-    if (newFlipped.length === 2) {
-      setAttempts(attempts + 1);
-      const [first, second] = newFlipped;
-      
-      if (cards[first].type === cards[second].type) {
-        setMatched([...matched, cards[first].type]);
-        setTimeout(() => setFlipped([]), 600);
-      } else {
-        setTimeout(() => setFlipped([]), 1000);
-      }
-    }
-  };
+        .card {
+            height: 160px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
 
-  const getMessage = () => {
-    if (matched.length === 0) return "Scopri i tre pilastri della sostenibilità! Trova le coppie.";
-    if (matched.length === 1) return "Ottimo inizio! Continua a scoprire...";
-    if (matched.length === 2) return "Ancora uno! Quasi alla fine...";
-    return "🎉 Perfetto! Hai scoperto tutti e tre i pilastri della sostenibilità!";
-  };
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
 
-  const getPillarInfo = (type) => {
-    const info = {
-      ambiente: "🌍 La casa che condividiamo: ogni gesto conta per l'equilibrio del pianeta",
-      economia: "💡 Progresso ripensato: creare valore per oggi e domani",
-      societa: "🤝 Il cuore pulsante: comunità unite per il bene comune"
-    };
-    return info[type];
-  };
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100 p-8 flex flex-col items-center justify-center">
-      <div className="max-w-4xl w-full">
-        <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">
-          Scopri i Pilastri della Sostenibilità
-        </h2>
-        
-        <p className="text-center text-lg mb-8 text-gray-700">
-          {getMessage()}
-        </p>
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          {cards.map((card, index) => {
-            const isFlipped = flipped.includes(index) || matched.includes(card.type);
-            const Icon = card.icon;
-            
-            return (
-              <div
-                key={card.id}
-                onClick={() => handleCardClick(index)}
-                className="relative h-40 cursor-pointer perspective-1000"
-              >
-                <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-                  {/* Back of card */}
-                  <div className="absolute w-full h-full bg-gradient-to-br from-gray-400 to-gray-600 rounded-xl shadow-lg flex items-center justify-center backface-hidden">
-                    <div className="text-6xl">🌱</div>
-                  </div>
-                  
-                  {/* Front of card */}
-                  <div className={`absolute w-full h-full ${card.color} rounded-xl shadow-lg flex flex-col items-center justify-center backface-hidden rotate-y-180 text-white`}>
-                    <Icon size={48} strokeWidth={2} />
-                    <p className="mt-3 font-bold text-lg">{card.title}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        .card-back {
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+            font-size: 4rem;
+        }
+
+        .card-front {
+            transform: rotateY(180deg);
+            color: white;
+            font-weight: bold;
+        }
+
+        .card-front svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+        }
+
+        .ambiente {
+            background: #10b981;
+        }
+
+        .economia {
+            background: #3b82f6;
+        }
+
+        .societa {
+            background: #8b5cf6;
+        }
+
+        .info-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .info-panel h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            align-items: start;
+        }
+
+        .info-emoji {
+            font-size: 1.5rem;
+        }
+
+        .info-text {
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .continue-btn {
+            display: block;
+            margin: 1.5rem auto 0;
+            background: #0d9488;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .continue-btn:hover {
+            background: #0f766e;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Scopri i Pilastri della Sostenibilità</h2>
+        <p class="message" id="message">Scopri i tre pilastri della sostenibilità! Trova le coppie.</p>
+
+        <div class="cards-grid" id="cardsGrid"></div>
+
+        <div class="info-panel hidden" id="infoPanel">
+            <h3>Pilastri Scoperti:</h3>
+            <div id="infoContent"></div>
+            <button class="continue-btn hidden" id="continueBtn">Continua il Viaggio →</button>
         </div>
-
-        {matched.length > 0 && (
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">Pilastri Scoperti:</h3>
-            <div className="space-y-3">
-              {matched.map((type) => (
-                <div key={type} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl">{type === 'ambiente' ? '🌍' : type === 'economia' ? '💰' : '❤️'}</div>
-                  <p className="text-gray-700">{getPillarInfo(type)}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {matched.length === 3 && (
-          <div className="mt-6 text-center">
-            <button className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-full transition-colors">
-              Continua il Viaggio →
-            </button>
-          </div>
-        )}
-      </div>
-
-      <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .transform-style-3d {
-          transform-style: preserve-3d;
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
-      `}</style>
     </div>
-  );
-}
+
+    <script>
+        const cards = [
+            { id: 1, type: 'ambiente', title: 'Ambiente', icon: 'leaf' },
+            { id: 2, type: 'ambiente', title: 'Ambiente', icon: 'leaf' },
+            { id: 3, type: 'economia', title: 'Economia', icon: 'dollar' },
+            { id: 4, type: 'economia', title: 'Economia', icon: 'dollar' },
+            { id: 5, type: 'societa', title: 'Società', icon: 'users' },
+            { id: 6, type: 'societa', title: 'Società', icon: 'users' },
+        ];
+
+        const icons = {
+            leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>',
+            dollar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+            users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+        };
+
+        const pillarInfo = {
+            ambiente: { emoji: '🌍', text: 'La casa che condividiamo: ogni gesto conta per l\'equilibrio del pianeta' },
+            economia: { emoji: '💰', text: 'Progresso ripensato: creare valore per oggi e domani' },
+            societa: { emoji: '❤️', text: 'Il cuore pulsante: comunità unite per il bene comune' }
+        };
+
+        let flipped = [];
+        let matched = [];
+        let shuffledCards = [];
+
+        function shuffle(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function updateMessage() {
+            const messageEl = document.getElementById('message');
+            if (matched.length === 0) {
+                messageEl.textContent = 'Scopri i tre pilastri della sostenibilità! Trova le coppie.';
+            } else if (matched.length === 1) {
+                messageEl.textContent = 'Ottimo inizio! Continua a scoprire...';
+            } else if (matched.length === 2) {
+                messageEl.textContent = 'Ancora uno! Quasi alla fine...';
+            } else {
+                messageEl.textContent = '🎉 Perfetto! Hai scoperto tutti e tre i pilastri della sostenibilità!';
+            }
+        }
+
+        function updateInfoPanel() {
+            const panel = document.getElementById('infoPanel');
+            const content = document.getElementById('infoContent');
+            const continueBtn = document.getElementById('continueBtn');
+
+            if (matched.length > 0) {
+                panel.classList.remove('hidden');
+                content.innerHTML = matched.map(type => {
+                    const info = pillarInfo[type];
+                    return `
+                        <div class="info-item">
+                            <div class="info-emoji">${info.emoji}</div>
+                            <div class="info-text">${info.text}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                if (matched.length === 3) {
+                    continueBtn.classList.remove('hidden');
+                }
+            }
+        }
+
+        function handleCardClick(index) {
+            if (flipped.length === 2 || flipped.includes(index) || matched.includes(shuffledCards[index].type)) {
+                return;
+            }
+
+            const cardEl = document.querySelectorAll('.card')[index];
+            cardEl.classList.add('flipped');
+            flipped.push(index);
+
+            if (flipped.length === 2) {
+                const [first, second] = flipped;
+                if (shuffledCards[first].type === shuffledCards[second].type) {
+                    matched.push(shuffledCards[first].type);
+                    updateInfoPanel();
+                    updateMessage();
+                    setTimeout(() => {
+                        flipped = [];
+                    }, 600);
+                } else {
+                    setTimeout(() => {
+                        document.querySelectorAll('.card')[first].classList.remove('flipped');
+                        document.querySelectorAll('.card')[second].classList.remove('flipped');
+                        flipped = [];
+                    }, 1000);
+                }
+            }
+        }
+
+        function initGame() {
+            shuffledCards = shuffle(cards);
+            const grid = document.getElementById('cardsGrid');
+            
+            grid.innerHTML = shuffledCards.map((card, index) => `
+                <div class="card" onclick="handleCardClick(${index})">
+                    <div class="card-inner">
+                        <div class="card-face card-back">🌱</div>
+                        <div class="card-face card-front ${card.type}">
+                            ${icons[card.icon]}
+                            <div>${card.title}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
