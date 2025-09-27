@@ -1,0 +1,141 @@
+import { useState } from 'react';
+import { Leaf, DollarSign, Users } from 'lucide-react';
+
+export default function SustainabilityCardGame() {
+  const initialCards = [
+    { id: 1, type: 'ambiente', icon: Leaf, color: 'bg-green-500', title: 'Ambiente' },
+    { id: 2, type: 'ambiente', icon: Leaf, color: 'bg-green-500', title: 'Ambiente' },
+    { id: 3, type: 'economia', icon: DollarSign, color: 'bg-blue-500', title: 'Economia' },
+    { id: 4, type: 'economia', icon: DollarSign, color: 'bg-blue-500', title: 'Economia' },
+    { id: 5, type: 'societa', icon: Users, color: 'bg-purple-500', title: 'Società' },
+    { id: 6, type: 'societa', icon: Users, color: 'bg-purple-500', title: 'Società' },
+  ];
+
+  const shuffleCards = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  const [cards, setCards] = useState(() => shuffleCards(initialCards));
+  const [flipped, setFlipped] = useState([]);
+  const [matched, setMatched] = useState([]);
+  const [attempts, setAttempts] = useState(0);
+
+  const handleCardClick = (index) => {
+    if (flipped.length === 2 || flipped.includes(index) || matched.includes(cards[index].type)) return;
+
+    const newFlipped = [...flipped, index];
+    setFlipped(newFlipped);
+
+    if (newFlipped.length === 2) {
+      setAttempts(attempts + 1);
+      const [first, second] = newFlipped;
+      
+      if (cards[first].type === cards[second].type) {
+        setMatched([...matched, cards[first].type]);
+        setTimeout(() => setFlipped([]), 600);
+      } else {
+        setTimeout(() => setFlipped([]), 1000);
+      }
+    }
+  };
+
+  const getMessage = () => {
+    if (matched.length === 0) return "Scopri i tre pilastri della sostenibilità! Trova le coppie.";
+    if (matched.length === 1) return "Ottimo inizio! Continua a scoprire...";
+    if (matched.length === 2) return "Ancora uno! Quasi alla fine...";
+    return "🎉 Perfetto! Hai scoperto tutti e tre i pilastri della sostenibilità!";
+  };
+
+  const getPillarInfo = (type) => {
+    const info = {
+      ambiente: "🌍 La casa che condividiamo: ogni gesto conta per l'equilibrio del pianeta",
+      economia: "💡 Progresso ripensato: creare valore per oggi e domani",
+      societa: "🤝 Il cuore pulsante: comunità unite per il bene comune"
+    };
+    return info[type];
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-100 p-8 flex flex-col items-center justify-center">
+      <div className="max-w-4xl w-full">
+        <h2 className="text-3xl font-bold text-center mb-4 text-gray-800">
+          Scopri i Pilastri della Sostenibilità
+        </h2>
+        
+        <p className="text-center text-lg mb-8 text-gray-700">
+          {getMessage()}
+        </p>
+
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          {cards.map((card, index) => {
+            const isFlipped = flipped.includes(index) || matched.includes(card.type);
+            const Icon = card.icon;
+            
+            return (
+              <div
+                key={card.id}
+                onClick={() => handleCardClick(index)}
+                className="relative h-40 cursor-pointer perspective-1000"
+              >
+                <div className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
+                  {/* Back of card */}
+                  <div className="absolute w-full h-full bg-gradient-to-br from-gray-400 to-gray-600 rounded-xl shadow-lg flex items-center justify-center backface-hidden">
+                    <div className="text-6xl">🌱</div>
+                  </div>
+                  
+                  {/* Front of card */}
+                  <div className={`absolute w-full h-full ${card.color} rounded-xl shadow-lg flex flex-col items-center justify-center backface-hidden rotate-y-180 text-white`}>
+                    <Icon size={48} strokeWidth={2} />
+                    <p className="mt-3 font-bold text-lg">{card.title}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {matched.length > 0 && (
+          <div className="bg-white rounded-xl p-6 shadow-lg">
+            <h3 className="text-xl font-bold mb-4 text-gray-800">Pilastri Scoperti:</h3>
+            <div className="space-y-3">
+              {matched.map((type) => (
+                <div key={type} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl">{type === 'ambiente' ? '🌍' : type === 'economia' ? '💰' : '❤️'}</div>
+                  <p className="text-gray-700">{getPillarInfo(type)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {matched.length === 3 && (
+          <div className="mt-6 text-center">
+            <button className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-full transition-colors">
+              Continua il Viaggio →
+            </button>
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        .transform-style-3d {
+          transform-style: preserve-3d;
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+          transform: rotateY(180deg);
+        }
+      `}</style>
+    </div>
+  );
+}
